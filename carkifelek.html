@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎡 Türkçe Çarkıfelek</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800;900&display=swap');
+:root{
+  --bg:#0d1b2a;--panel:#1b2e44;--gold:#f7c948;--red:#ff6b6b;
+  --teal:#4ecdc4;--purple:#a29bfe;--green:#55efc4;--text:#f0f4ff;--dim:#8899aa;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse at 20% 20%,rgba(162,155,254,.08) 0%,transparent 60%),
+             radial-gradient(ellipse at 80% 80%,rgba(78,205,196,.08) 0%,transparent 60%);
+  pointer-events:none;z-index:0;}
+
+.wrapper{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;padding:16px 12px 40px;gap:14px;}
+
+/* HEADER */
+.header{text-align:center;}
+.header h1{font-family:'Fredoka One',cursive;font-size:clamp(2rem,5vw,3.2rem);
+  background:linear-gradient(135deg,var(--gold),var(--red),var(--purple));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.header p{color:var(--dim);font-size:.9rem;margin-top:3px;}
+
+/* TEAM SETUP */
+.team-setup{background:var(--panel);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:14px 18px;width:100%;max-width:900px;}
+.team-setup-title{font-family:'Fredoka One',cursive;font-size:1rem;color:var(--gold);margin-bottom:10px;}
+.team-inputs{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+.team-input-wrap{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:6px 12px;}
+.team-input-wrap label{font-size:.7rem;color:var(--dim);font-weight:700;text-transform:uppercase;letter-spacing:.8px;white-space:nowrap;}
+.team-name-inp{background:transparent;border:none;outline:none;color:var(--text);font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:700;width:110px;}
+.team-name-inp::placeholder{color:rgba(136,153,170,.5);}
+.add-team-btn{font-family:'Fredoka One',cursive;font-size:.82rem;padding:7px 14px;border-radius:8px;border:1px dashed rgba(255,255,255,.2);background:transparent;color:var(--dim);cursor:pointer;transition:all .2s;}
+.add-team-btn:hover{background:rgba(255,255,255,.08);color:var(--text);}
+.remove-team-btn{background:none;border:none;color:var(--red);cursor:pointer;font-size:1rem;padding:0 0 0 4px;opacity:.5;transition:opacity .2s;line-height:1;}
+.remove-team-btn:hover{opacity:1;}
+
+/* SCOREBOARD */
+.scoreboard{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;width:100%;max-width:900px;}
+.team-card{background:var(--panel);border:2px solid transparent;border-radius:16px;
+  padding:10px 22px;text-align:center;transition:all .2s;min-width:120px;flex:1;max-width:200px;}
+.team-card.active{border-color:var(--gold);box-shadow:0 0 22px rgba(247,201,72,.4);}
+.team-card .tname{font-size:.75rem;color:var(--dim);font-weight:700;text-transform:uppercase;letter-spacing:1px;}
+.team-card .tscore{font-family:'Fredoka One',cursive;font-size:2.2rem;color:var(--gold);line-height:1.1;}
+.team-card .tpending{font-size:.72rem;color:var(--teal);}
+
+/* GAME AREA — yan yana büyük layout */
+.game-area{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;align-items:flex-start;width:100%;max-width:1300px;}
+
+/* WHEEL — büyük */
+.wheel-side{display:flex;flex-direction:column;align-items:center;gap:14px;}
+.wheel-container{position:relative;width:min(460px,44vw);height:min(460px,44vw);}
+canvas#wc{width:100%;height:100%;border-radius:50%;filter:drop-shadow(0 0 30px rgba(247,201,72,.35));}
+.wheel-arrow{position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:2.6rem;z-index:10;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5));}
+.spin-btn{font-family:'Fredoka One',cursive;font-size:1.4rem;
+  background:linear-gradient(135deg,var(--gold),#e0a800);color:#1a1a1a;
+  border:none;border-radius:50px;padding:14px 48px;cursor:pointer;
+  transition:transform .15s,box-shadow .15s;box-shadow:0 4px 24px rgba(247,201,72,.45);}
+.spin-btn:hover:not(:disabled){transform:scale(1.05);box-shadow:0 6px 32px rgba(247,201,72,.55);}
+.spin-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.spin-result{font-family:'Fredoka One',cursive;font-size:1.7rem;min-height:2.2rem;text-align:center;}
+
+/* PUZZLE SIDE — büyük */
+.puzzle-side{flex:1;min-width:340px;display:flex;flex-direction:column;gap:14px;}
+.category-badge{display:inline-block;padding:7px 20px;border-radius:50px;font-weight:800;
+  font-size:.9rem;text-transform:uppercase;letter-spacing:1.5px;align-self:flex-start;}
+.cat-deyim{background:rgba(162,155,254,.2);color:var(--purple);border:1px solid var(--purple);}
+.cat-atasoz{background:rgba(78,205,196,.2);color:var(--teal);border:1px solid var(--teal);}
+
+/* PUZZLE TILES — büyük */
+.puzzle-display{display:flex;flex-wrap:wrap;gap:6px;padding:18px;
+  background:rgba(255,255,255,.04);border-radius:16px;
+  border:1px solid rgba(255,255,255,.1);min-height:100px;align-items:center;}
+.word-group{display:flex;flex-wrap:wrap;gap:5px;margin-right:8px;margin-bottom:6px;}
+.letter-tile{width:42px;height:52px;display:flex;align-items:center;justify-content:center;
+  border-radius:9px;font-family:'Fredoka One',cursive;font-size:1.35rem;border-bottom:4px solid;transition:all .3s;}
+.letter-tile.hidden{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.18);color:transparent;}
+.letter-tile.revealed{background:rgba(247,201,72,.15);border-color:var(--gold);color:var(--gold);
+  animation:popIn .3s cubic-bezier(.36,1.56,.64,1);}
+.letter-tile.special{background:transparent;border:none;border-bottom:none;color:rgba(255,255,255,.4);font-size:1.6rem;}
+@keyframes popIn{0%{transform:scale(.5);opacity:0}100%{transform:scale(1);opacity:1}}
+
+/* VOWEL HINT */
+.vowel-hint{font-size:.8rem;color:var(--gold);background:rgba(247,201,72,.1);border:1px solid rgba(247,201,72,.25);
+  border-radius:8px;padding:5px 12px;font-weight:700;}
+
+/* INPUT */
+.input-area{display:flex;gap:10px;align-items:center;}
+.letter-input{width:62px;height:62px;border-radius:12px;background:var(--panel);
+  border:2px solid var(--purple);color:var(--text);font-family:'Fredoka One',cursive;
+  font-size:2rem;text-align:center;text-transform:uppercase;outline:none;transition:border-color .2s;}
+.letter-input:focus{border-color:var(--gold);}
+.guess-btn{flex:1;font-family:'Fredoka One',cursive;font-size:1.1rem;
+  background:linear-gradient(135deg,var(--purple),#6c5ce7);color:#fff;
+  border:none;border-radius:12px;padding:14px 16px;cursor:pointer;transition:transform .15s,opacity .15s;}
+.guess-btn:hover:not(:disabled){transform:scale(1.03);}
+.guess-btn:disabled{opacity:.4;cursor:not-allowed;}
+.solve-btn{flex:1;font-family:'Fredoka One',cursive;font-size:1.1rem;
+  background:linear-gradient(135deg,var(--teal),#00b894);color:#1a1a1a;
+  border:none;border-radius:12px;padding:14px 16px;cursor:pointer;transition:transform .15s,opacity .15s;}
+.solve-btn:hover:not(:disabled){transform:scale(1.03);}
+.solve-btn:disabled{opacity:.4;cursor:not-allowed;}
+
+/* USED LETTERS */
+.used-letters{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.used-letters span{font-size:.72rem;color:var(--dim);font-weight:700;text-transform:uppercase;}
+.used-pill{padding:3px 11px;border-radius:50px;font-family:'Fredoka One',cursive;font-size:.9rem;}
+.used-pill.hit{background:rgba(85,239,196,.15);color:var(--green);border:1px solid var(--green);}
+.used-pill.miss{background:rgba(255,107,107,.15);color:var(--red);border:1px solid var(--red);}
+.used-pill.vowel-paid{background:rgba(247,201,72,.15);color:var(--gold);border:1px solid var(--gold);}
+
+/* MESSAGE */
+.message-box{padding:13px 18px;border-radius:12px;font-weight:700;font-size:1rem;
+  min-height:48px;display:flex;align-items:center;gap:8px;line-height:1.5;}
+.msg-info{background:rgba(162,155,254,.15);border:1px solid rgba(162,155,254,.3);color:var(--purple);}
+.msg-good{background:rgba(85,239,196,.15);border:1px solid rgba(85,239,196,.3);color:var(--green);}
+.msg-bad{background:rgba(255,107,107,.15);border:1px solid rgba(255,107,107,.3);color:var(--red);}
+.msg-win{background:rgba(247,201,72,.2);border:1px solid var(--gold);color:var(--gold);}
+
+/* EXPLANATION */
+.explanation-box{background:linear-gradient(135deg,rgba(247,201,72,.12),rgba(162,155,254,.1));
+  border:1px solid rgba(247,201,72,.35);border-radius:14px;padding:16px 20px;display:none;}
+.explanation-box.show{display:block;}
+.explanation-box .ex-title{font-family:'Fredoka One',cursive;font-size:1.05rem;color:var(--gold);margin-bottom:6px;}
+.explanation-box .ex-text{font-size:.92rem;color:var(--text);line-height:1.6;opacity:.9;}
+
+/* CONTROLS */
+.controls{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+.ctrl-btn{font-family:'Fredoka One',cursive;font-size:.9rem;padding:8px 20px;
+  border-radius:50px;border:1px solid rgba(255,255,255,.15);
+  background:rgba(255,255,255,.05);color:var(--dim);cursor:pointer;transition:all .2s;}
+.ctrl-btn:hover{background:rgba(255,255,255,.1);color:var(--text);}
+
+/* TUR SONU PUAN EKRANI */
+.round-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);
+  display:none;align-items:center;justify-content:center;z-index:150;backdrop-filter:blur(8px);}
+.round-overlay.show{display:flex;}
+.round-board{background:var(--panel);border:2px solid var(--gold);border-radius:24px;
+  padding:32px 40px;max-width:560px;width:92%;text-align:center;
+  box-shadow:0 0 80px rgba(247,201,72,.3);}
+.round-board h2{font-family:'Fredoka One',cursive;font-size:2rem;color:var(--gold);margin-bottom:6px;}
+.round-board .round-sub{color:var(--dim);font-size:.9rem;margin-bottom:24px;}
+.round-scores{display:flex;flex-direction:column;gap:12px;margin-bottom:24px;}
+.round-score-row{display:flex;justify-content:space-between;align-items:center;
+  background:rgba(255,255,255,.05);border-radius:12px;padding:12px 20px;}
+.round-score-row.winner{background:rgba(247,201,72,.15);border:1px solid rgba(247,201,72,.4);}
+.round-score-row .rs-name{font-weight:800;font-size:1.05rem;}
+.round-score-row .rs-pts{font-family:'Fredoka One',cursive;font-size:1.6rem;color:var(--gold);}
+.round-score-row .rs-gained{font-size:.78rem;color:var(--teal);margin-top:2px;}
+.round-next-btn{font-family:'Fredoka One',cursive;font-size:1.2rem;
+  background:linear-gradient(135deg,var(--gold),#e0a800);color:#1a1a1a;
+  border:none;border-radius:50px;padding:13px 44px;cursor:pointer;
+  box-shadow:0 4px 20px rgba(247,201,72,.4);transition:transform .15s;}
+.round-next-btn:hover{transform:scale(1.05);}
+
+/* MODALS */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);
+  display:none;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(5px);}
+.modal-overlay.show{display:flex;}
+.modal{background:var(--panel);border:2px solid var(--gold);border-radius:20px;
+  padding:28px;max-width:460px;width:92%;text-align:center;box-shadow:0 0 60px rgba(247,201,72,.25);}
+.modal h2{font-family:'Fredoka One',cursive;font-size:1.7rem;color:var(--gold);margin-bottom:10px;}
+.modal p{color:var(--dim);margin-bottom:16px;font-size:.9rem;}
+.modal-input{width:100%;padding:12px 16px;border-radius:10px;background:var(--bg);
+  border:2px solid var(--purple);color:var(--text);font-family:'Nunito',sans-serif;
+  font-size:1rem;font-weight:700;outline:none;margin-bottom:12px;}
+.modal-input:focus{border-color:var(--gold);}
+.modal-actions{display:flex;gap:10px;}
+.modal-confirm{flex:1;font-family:'Fredoka One',cursive;font-size:1.1rem;
+  background:linear-gradient(135deg,var(--gold),#e0a800);color:#1a1a1a;border:none;border-radius:10px;padding:12px;cursor:pointer;}
+.modal-cancel{flex:1;font-family:'Fredoka One',cursive;font-size:1.1rem;
+  background:rgba(255,107,107,.2);color:var(--red);border:1px solid var(--red);border-radius:10px;padding:12px;cursor:pointer;}
+
+/* SOUND TOGGLE */
+.sound-toggle{position:fixed;top:14px;right:14px;z-index:50;background:var(--panel);
+  border:1px solid rgba(255,255,255,.15);border-radius:50px;padding:7px 16px;
+  cursor:pointer;font-size:.82rem;color:var(--dim);font-family:'Fredoka One',cursive;
+  transition:all .2s;display:flex;align-items:center;gap:5px;}
+.sound-toggle:hover{background:rgba(255,255,255,.08);color:var(--text);}
+.sound-toggle.on{color:var(--gold);border-color:rgba(247,201,72,.4);}
+
+/* CONFETTI & FLASH */
+@keyframes confettiFall{0%{transform:translateY(-10px) rotate(0);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+.confetti{position:fixed;width:10px;height:10px;border-radius:2px;pointer-events:none;animation:confettiFall 2s ease-in forwards;z-index:200;}
+.bankrupt-flash{position:fixed;inset:0;background:rgba(255,0,0,.18);pointer-events:none;z-index:50;opacity:0;transition:opacity .1s;}
+.bankrupt-flash.show{opacity:1;}
+</style>
+</head>
+<body>
+<button class="sound-toggle on" id="soundToggle" onclick="toggleSound()">🔊 Ses Açık</button>
+
+<div class="wrapper">
+  <div class="header">
+    <h1>🎡 Türkçe Çarkıfelek</h1>
+    <p>Çarkı çevir &bull; Harf söyle &bull; Deyimi ya da atasözünü bul!</p>
+  </div>
+
+  <!-- TEAM SETUP -->
+  <div class="team-setup">
+    <div class="team-setup-title">👥 Takım İsimleri</div>
+    <div class="team-inputs" id="teamInputs"></div>
+  </div>
+
+  <!-- SCOREBOARD -->
+  <div class="scoreboard" id="sb"></div>
+
+  <!-- GAME AREA -->
+  <div class="game-area">
+    <!-- WHEEL -->
+    <div class="wheel-side">
+      <div class="wheel-container">
+        <div class="wheel-arrow">▼</div>
+        <canvas id="wc" width="600" height="600"></canvas>
+      </div>
+      <div class="spin-result" id="spinResult">—</div>
+      <button class="spin-btn" id="spinBtn" onclick="spinWheel()">🎰 Çarkı Çevir</button>
+    </div>
+
+    <!-- PUZZLE -->
+    <div class="puzzle-side">
+      <div id="badge" class="category-badge cat-deyim">💬 DEYİM</div>
+      <div class="puzzle-display" id="pd"></div>
+      <div class="vowel-hint" id="vowelHint" style="display:none"></div>
+      <div class="used-letters" id="ul"><span>Kullanılan:</span></div>
+      <div class="message-box msg-info" id="msg">✨ Çarkı çevirerek başla!</div>
+
+      <div class="input-area">
+        <input class="letter-input" id="li" maxlength="1" placeholder="?" disabled
+          onkeydown="if(event.key==='Enter')guessLetter()">
+        <button class="guess-btn" id="gb" onclick="guessLetter()" disabled>Harf Söyle</button>
+        <button class="solve-btn" id="slvb" onclick="openModal()" disabled>🎯 Çöz!</button>
+      </div>
+
+      <div class="explanation-box" id="exBox">
+        <div class="ex-title" id="exTitle"></div>
+        <div class="ex-text" id="exText"></div>
+      </div>
+
+      <div class="controls">
+        <button class="ctrl-btn" onclick="newPuzzle()">🔄 Yeni Soru</button>
+        <button class="ctrl-btn" onclick="skipTurn()">➡️ Sırayı Geç</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TUR SONU PUAN EKRANI -->
+<div class="round-overlay" id="roundOverlay">
+  <div class="round-board">
+    <h2>🏁 Tur Sonu!</h2>
+    <div class="round-sub" id="roundSub"></div>
+    <div class="round-scores" id="roundScores"></div>
+    <button class="round-next-btn" onclick="closeRoundBoard()">▶ Sonraki Tura Geç</button>
+  </div>
+</div>
+
+<!-- SOLVE MODAL -->
+<div class="modal-overlay" id="mo">
+  <div class="modal">
+    <h2>🎯 Tümünü Çöz!</h2>
+    <p>Deyimi / atasözünü eksiksiz yaz ve büyük puan kazan!</p>
+    <input class="modal-input" id="si" placeholder="Cevabını yaz..." onkeydown="if(event.key==='Enter')confirmSolve()">
+    <div class="modal-actions">
+      <button class="modal-confirm" onclick="confirmSolve()">✅ Cevapla</button>
+      <button class="modal-cancel" onclick="closeModal()">İptal</button>
+    </div>
+  </div>
+</div>
+
+<div class="bankrupt-flash" id="bf"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// VERİ
+// ═══════════════════════════════════════════════════════════════
+const SESLI = new Set(['A','E','I','İ','O','Ö','U','Ü']);
+
+const DEYIMLER = {
+"Ağzında bakla ıslanmamak":"Hiç sır saklayamamak.",
+"Bağrına basmak":"Birini sevgiyle kucaklamak, benimsemek.",
+"Canı tez":"Bir işin çarçabuk yapılmasını ister, sabırsız, ivecen.",
+"Dağarcığına atmak":"Öğrendiği bir bilgiyi ya da deneyimi hafızasına kaydetmek.",
+"Ekmeğine yağ sürmek":"Birinin işine gelmek, çıkarına yaramak.",
+"Faka basmak":"Tuzağa düşmek, kandırılmak.",
+"Gönül almak":"Birini uygun davranışla, bir armağanla sevindirmek.",
+"İbret almak":"Başkasının başına gelen kötü olaydan ders çıkarmak.",
+"Kabına sığmamak":"Taşkın davranışlarda bulunmak.",
+"Hafife almak":"Önemsiz saymak.",
+"Ağzından baklayı çıkarmamak":"Sakladığı şeyi bir türlü söylememek.",
+"Dolap çevirmek":"Gizlice ve kurnazca iş çevirmek.",
+"Ağzından bal damlamak":"Çok tatlı ve hoş konuşmak.",
+"Nabzına göre şerbet vermek":"Kişinin durumuna ve isteklerine göre davranmak.",
+"Baltayı taşa vurmak":"İşi mahvetmek, ters bir harekette bulunmak.",
+"Ağzından laf almak":"Bir kimseyi konuşturarak gizli tuttuğu şey üzerine bilgi edinmek.",
+"Barut kesilmek":"Çok sinirlenip öfkelenmek.",
+"Enine boyuna":"Her yönü ile bütün olasılıkları göz önünde bulundurmak.",
+"Balık istifi":"Çok sıkışık şekilde, üst üste.",
+"Dağlara düşmek":"Büyük bir üzüntü sebebiyle insanlardan kaçıp ıssız yerlerde dolaşır olmak.",
+"Canından bezmek":"Çektiği sıkıntı yüzünden artık yaşamayı istemeyecek duruma gelmek.",
+"Dizinin bağı çözülmek":"Korkudan ayakta durma gücü kalmamak.",
+"Donup kalmak":"Şaşkınlıktan hareketsiz kalmak.",
+"Cana yakın":"Sevimli ve çabuk iletişime geçen.",
+"Sapla samanı karıştırmak":"Birbirinden farklı şeyleri birbirine karıştırmak.",
+"Aklına esmek":"Daha önce düşünmemiş olduğu bir şeyi birden yapmaya karar vermek.",
+"Altında kalmamak":"Gördüğü iyiliği ya da kötülüğü karşılıksız bırakmamak.",
+"Bam teline basmak":"Birinin en hassas noktasına dokunmak.",
+"Atıp tutmak":"Yüksek laflar söylemek, ağır sözlerle öfkesini göstermek.",
+"Ayağı yerden kesilmek":"Çok sevinmek, sevinçten hoplamak.",
+"Defteri kapamak":"Birisiyle ilişkiyi tamamen kesmek.",
+"Ayağına gelmek":"Emek verilmeden elde etmek.",
+"Feleğin çemberinden geçmek":"Çok büyük sıkıntılar ve zorluklarla mücadele etmek.",
+"Yakasına yapışmak":"Birini sorumlu tutarak peşini bırakmamak.",
+"Ele avuca sığmamak":"Söz dinlememek, kural tanımamak, afacan.",
+"Yan çizmek":"Bir işten kaçınmak, sorumluluktan sıyrılmak.",
+"Ayağını çekmek":"Daha önce sık gittiği yere artık gitmez olmak.",
+"Ayaklarına kara sular inmek":"Uzun süre ayakta beklemekten çok yorulmak.",
+"Dili uzun olmak":"Başkalarına saygısızca konuşmak, küstah olmak.",
+"Diş bilemek":"Birine karşı kin beslemek, intikam almayı istemek.",
+"Başına buyruk":"Kimseye bağlı kalmadan, kendi bildiğini yapan.",
+"Burnundan solumak":"Çok öfkelenip sinirlenmiş olmak.",
+"Burnundan kıl aldırmamak":"Kimsenin kendisine bir şey söylemesine izin vermemek.",
+"Can evinden vurmak":"Bir kimseye en zayıf noktasından vurarak büyük zarar vermek.",
+"Canla başla":"Hiçbir özveriden kaçmayarak, var gücüyle.",
+"Arada kalmak":"İki taraf arasında sıkışıp güç duruma düşmek.",
+"Dilini tutamamak":"Söylememesi gereken şeyleri söylemek.",
+"Diş geçirememek":"Bir kimseye veya şeye zarar verememek.",
+"Dilini yutmak":"Birdenbire susmak, konuşmaz hale gelmek.",
+"Dişe dokunur":"Değerli, işe yarar.",
+"Kafa tutmak":"Karşı gelmek, boyun eğmemek.",
+"Dişinden tırnağından artırmak":"Büyük bir özenle para biriktirmek.",
+"El ele vermek":"İş birliği yapmak, güçlerini birleştirmek.",
+"Gözleri süzülmek":"Göz kapakları birbirine yaklaşmak, uykusu gelmek.",
+"Dudak ısırtmak":"Çok güzel veya çok iyi olmak.",
+"Göğüs germek":"Bir güçlüğe cesurca karşı koymak.",
+"Dut yemiş bülbüle dönmek":"Önce çok konuşurken artık sesi çıkmaz olmak.",
+"Etekleri zil çalmak":"Çok sevinmek, neşeden havalara uçmak.",
+"El üstünde tutulmak":"Bir kimseyi çok sevmek ve ona saygı göstermek.",
+"Beyninde şimşekler çakmak":"Aklına ani bir fikir ya da çözüm gelmek.",
+"Devede kulak":"Çok büyük bir şeyin yanında son derece küçük ve önemsiz.",
+"Göklere çıkarmak":"Pek çok övmek.",
+"Elden çıkarmak":"Satmak.",
+"Göğsü kabarmak":"Gurur ve mutluluk duymak.",
+"Başı göğe ermek":"Çok mutlu olmak, kendini çok önemli hissetmek.",
+"Gönlünü hoş etmek":"İstediğini yaparak sevindirmek.",
+"Fellik fellik aramak":"Her yerde aramak, aramaktan yorulmak.",
+"Gözleri dolmak":"Üzülme ve duygulanmadan dolayı gözleri yaşla dolmak.",
+"Karda gezip izini belli etmemek":"Yaptığı uygunsuz işi kimsenin sezmeyeceği bir ustalıkla yapmak.",
+"Gözü gönlü tok":"Geçim sıkıntısı çekmesine rağmen kimseden yardım istemeyen.",
+"Kaşla göz arasında":"Çok kısa sürede, göz açıp kapayıncaya kadar.",
+"Mürekkep yalamak":"Az çok öğrenim görmüş olmak.",
+"Gözüne girmek":"Anlayışlılığı, çalışkanlığı ile büyüğünün saygı ve güvenini kazanmak.",
+"İçli dışlı olmak":"Birbirine çok yakın ve samimi olmak.",
+"Dile getirmek":"Bir durum veya olayı sözle belirtmek.",
+"Gönül vermek":"Sevgi ile bağlanmak.",
+"İki arada bir derede kalmak":"İki taraf arasında sıkışıp ne yapacağını bilememek.",
+"Lamı cimi yok":"Hiçbir itiraz ya da bahane kabul edilmez.",
+"Kafa dengi":"Düşünce ve davranış biçimi birbirine uyan.",
+"Kale almamak":"Sözünü etmeye değer saymamak, önemsiz bulmak.",
+"Hop oturup hop kalkmak":"Öfkesinden yerinde duramaz hâlde olmak.",
+"İçi cız etmek":"Birden acı bir duygu hissetmek.",
+"Gözlerine inanamamak":"Gördüklerinin doğru olduğuna inanamayacak kadar şaşırmak.",
+"İpe un sermek":"İşi yapmamak için bahaneler ileri sürmek.",
+"Gözden geçirmek":"Okumak, niteliğini anlamak için incelemek.",
+"Kafa patlatmak":"Bir şey üzerine çok düşünmek.",
+"Göz açıp kapayıncaya kadar":"Çok kısa sürede, anında.",
+"Göz kulak olmak":"Korunması gereken bir kimseyi ya da bir şeyi görüp gözetmek.",
+"Kendine yedirememek":"Bir şeyi yapmayı kişiliğine yakıştıramamak.",
+"Foyası meydana çıkmak":"Gerçek yüzü, aslı ortaya çıkmak.",
+"Kol kanat germek":"Bir kimseyi koruyuculuğu altına almak.",
+"Yabana atmak":"Küçümsemek, değersiz görmek.",
+"Kökünü kurutmak":"Bir şeyi tamamen yok etmek.",
+"Parmağına dolamak":"Birini kolayca kandırmak ve yönetmek.",
+"Ramak kalmak":"Çok az kalmak, neredeyse olmak üzere olmak.",
+"Akıntıya kürek çekmek":"Olağan gidişi tersine çevirmek.",
+"Kulak kabartmak":"Belli etmemeye çalışarak gizlice dinlemek.",
+"Kulak asmamak":"Söylenenlere aldırmamak, önem vermemek.",
+"Pot kırmak":"Yanlışlıkla gaf yapmak, uygunsuz bir söz söylemek.",
+"Küplere binmek":"Çok öfkelenip ateş püskürmek.",
+"Maval okumak":"Gerçek olmayan şeyler söylemek, palavra atmak.",
+"İçi içine sığmamak":"Çok heyecanlanıp sevinmek.",
+"Palas pandıras":"Aceleyle, düzensizce.",
+"Parmak ısırmak":"Hayret etmek, şaşırmak.",
+"Maraza çıkarmak":"Kavga çıkarmak, ortalığı karıştırmak.",
+"Sıcağı sıcağına":"Zaman geçip unutulmadan, hemen.",
+"Sözünün eri olmak":"Verdiği sözü ne pahasına olursa olsun yerine getirmek.",
+"Tüyleri diken diken olmak":"Korkmaktan, dehşet duymaktan vücuttaki kıl dipleri kabarmak.",
+"Üç aşağı beş yukarı":"Aşağı yukarı, yaklaşık olarak.",
+"Sünger çekmek":"Geçmişteki kötü olayları unutmak, affetmek.",
+"Şafak atmak":"Hava ağarmaya başlamak, tan yeri sökmek.",
+"Verip veriştirmek":"Birini sert bir şekilde azarlamak.",
+"Şevke gelmek":"İstekli ve hevesli bir hale gelmek.",
+"Yüreğe işlemek":"Derinden etkilemek, içe işlemek.",
+"Taş atmak":"Birini üzmek için üstü kapalı söz söylemek.",
+"İpin ucunu kaçırmak":"Kontrolü elden bırakmak.",
+"İyi gün dostu":"Yalnızca işler yolundayken yanında olan dost.",
+"Tavına getirmek":"Birini en uygun zamanda yakalayıp etkilemek.",
+"Zemin hazırlamak":"Bir iş için uygun ortam ve koşulları oluşturmak.",
+"Tepeden bakmak":"Kendisini karşısındakinden üstün görmek.",
+"Tereciye tere satmak":"Bir konuyu o konuyu çok iyi bilen birine anlatmaya çalışmak.",
+"Veryansın etmek":"Şiddetle saldırmak, hakarete yönelmek.",
+"Dört elle sarılmak":"Bir işi büyük istekle ve azimle yapmak.",
+"Yüzünün akıyla çıkmak":"Kendinden beklenen işi eksiksiz ve başarılı olarak yapmak.",
+"Zerre kadar":"En küçük miktarda bile."
+};
+
+const ATASOZLERI = {
+"Baş başa vermeyince taş yerinden kalkmaz":"Kimseye danışmadan yapılan bir işin üstesinden kolay gelinmez. Başarı için en iyi yol fikir alışverişidir.",
+"Yarınki kazdan bugünkü tavuk yeğdir":"Bugün elimizdeki kazanç, yarın belki elde edeceğimizden daha değerlidir.",
+"Yatan aslandan gezen tilki yeğdir":"Az güçlü olup çalışan, çok güçlü olup çalışmayandan daha başarılı olur.",
+"Zararın neresinden dönersen kârdır":"Zararlı bir işten ne denli erken vazgeçersek daha az zarar görürüz.",
+"Bir musibet bin nasihatten yeğdir":"Başa gelen bir yıkım, yüzlerce öğütten daha iyi uyandırır.",
+"Davulun sesi uzaktan hoş gelir":"İçinde yaşayan kimseyi rahatsız eden durumlar, uzaktan bakan için cazip görünür.",
+"Boş çuval dik durmaz":"Karnı doymayan kimse çalışamaz; bilgisiz kişi görevde tutunamaz.",
+"Can boğazdan gelir":"İnsan yemekle yaşar; boğazına bakmayan kişinin sağlığı tehlikeye düşer.",
+"Can çıkmadan huy çıkmaz":"İnsan ölene kadar huyunu değiştirmez.",
+"Alet işler el övünür":"İnsan ne kadar usta olursa olsun, gerekli araçlar olmadıkça kusursuz iş yapamaz.",
+"Aman diyene kılıç kalkmaz":"Mertliğine sığınıp teslim olan düşmanın canına kıyılmamalıdır.",
+"Az tamah çok ziyan getirir":"Elde ettikleriyle yetinmeyerek daha çoğunun peşinde koşanlar daha çok zarara uğrarlar.",
+"Aza kanaat etmeyen çoğu hiç bulamaz":"Küçük şeyleri hor görenler, büyük şey edinmek fırsatını kaçırırlar.",
+"Azıcık aşım kaygısız başım":"Orta halli bir geçim, didiştirmeli zenginlerin yaşayışından daha iyidir.",
+"Bal bal demekle ağız tatlanmaz":"Bir şeyin sadece sözünü etmek o şeyden çıkar getirmez.",
+"Çıkmadık candan umut kesilmez":"Yaşayan insandan umut kesilmez.",
+"Damlaya damlaya göl olur":"Küçük birikimlerin zamanla büyük bir toplamı oluşturduğunu anlatır.",
+"Denize düşen yılana sarılır":"Çok büyük tehlikede olan kimse, her yardımı kabul eder.",
+"Dervişin fikri ne ise zikri de odur":"Kişinin zihninde ne varsa dilinde de odur.",
+"Dikensiz gül olmaz":"Her güzel şeyin hoşa gitmeyen yönü de bulunur.",
+"Doğru söyleyeni dokuz köyden kovarlar":"Sözünü esirgemeyen doğrucu kişiyi kimse sevmez.",
+"İşleyen demir pas tutmaz":"Tembel oturan kimse hantallaşır; çalışkan gittikçe daha yararlı işler yapar.",
+"El elden üstündür":"Bir konuda çok ileri durumu bulunan kişi, o konunun son kertesine ulaşmış değildir.",
+"Sakla samanı gelir zamanı":"Her şeyin ileride işe yarayabileceği zamanı gelebilir.",
+"Bal tutan parmağını yalar":"Güzel veya kazançlı bir işle uğraşan ondan nasibini alır.",
+"El yarası geçer dil yarası geçmez":"Silahla açılan el yarası çabuk iyi olur ama kötü sözle açılan dil yarası kapanmaz.",
+"Emeksiz yemek olmaz":"Yaşayabilmek için çalışıp kazanmak gerekir.",
+"Akıl akıldan üstündür":"Güvendiğiniz akıllı kimselerin düşüncesini sorunuz; sizin düşünemediklerinizi başkası düşünebilir.",
+"Büyük lokma ye büyük söz söyleme":"Kimse başkalarını kınayıp 'Ben böyle bir duruma düşmem' diye konuşmamalıdır.",
+"Görünen köy kılavuz istemez":"Ortada duran bir gerçeği açıklamak gerekmez.",
+"Gül dikensiz olmaz":"Her güzel şeyin hoşa gitmeyen yönü de bulunur; güzel şeyi elde etmek isteyen bunu da hoş görmelidir.",
+"Meyve veren ağacı taşlarlar":"Çoğu zaman bilgili ve becerikli kimselere sataşırlar.",
+"Mum dibine ışık vermez":"Bir kimse başkalarına bol bol yaptığı yardımı kendi yakınlarına yapmaz.",
+"Her koyun kendi bacağından asılır":"Herkes kendi davranışlarından sorumludur.",
+"Akan su yosun tutmaz":"Tembel oturan kimse hantallaşır; çalışkan gittikçe daha yararlı işler yapar.",
+"Ak akçe kara gün içindir":"Biriktirilen para, dar zamanımızda bizi sıkıntıdan kurtarır.",
+"Kaçan balık büyük olur":"Elde edilemeyen şey her zaman daha değerli ve büyük görünür.",
+"Sabır acıdır meyvesi tatlıdır":"Sabır güçtür ama güzel sonuç verir.",
+"Bir elin nesi var iki elin sesi var":"İnsan büyük işleri tek başına yapamaz; başkasıyla iş birliği yapmalıdır.",
+"Komşunun tavuğu komşuya kaz görünür":"Başkasındaki şeyler her zaman daha iyi ve büyük görünür.",
+"Parayı veren düdüğü çalar":"Parasını veren kimse, istediği şeyi elde eder.",
+"Öfkeyle kalkan zararla oturur":"Öfkeli zamanda iyi düşünülemiyor ve sonunda zararını görürsün.",
+"Nerde birlik orda dirlik":"İnsanların birlik ve beraberlik içinde olduğu yerde huzur ve düzen bulunur.",
+"Söz gümüşse sükût altındır":"Konuşmak değerliyse de susmak daha değerlidir.",
+"Taşıma su ile değirmen dönmez":"Yeterince güç bulunmadıkça şunun bunun küçük yardımlarıyla büyük iş yürütülemez.",
+"Sütten ağzı yanan yoğurdu üfleyerek yer":"Bir davranışı kendisine pahalıya mal olan kişi, benzeri durumlarda çok ihtiyatlı davranır.",
+"Tek kanatla kuş uçmaz":"Öyle işler vardır ki ancak bir yardımcı ile iş birliği yapılırsa başarılabilir.",
+"Ummadığın taş baş yarar":"Beklenmedik yerden tehlike veya zarar gelebilir.",
+"Yanlış hesap Bağdattan döner":"Yanlış yapılan hesabın sonuçta düzeltilmesi gerekir; hatalar er ya da geç ortaya çıkar."
+};
+
+// ═══════════════════════════════════════════════════════════════
+// ÇARK AYARLARI — İFLAS KALDIRILDI
+// ═══════════════════════════════════════════════════════════════
+const SEGS=[
+  {l:"100",v:100,c:"#f7c948",t:"#1a1a1a"},
+  {l:"200",v:200,c:"#ff6b6b",t:"#fff"},
+  {l:"300",v:300,c:"#a29bfe",t:"#fff"},
+  {l:"500",v:500,c:"#4ecdc4",t:"#1a1a1a"},
+  {l:"750",v:750,c:"#fd79a8",t:"#fff"},
+  {l:"150",v:150,c:"#55efc4",t:"#1a1a1a"},
+  {l:"250",v:250,c:"#6c5ce7",t:"#fff"},
+  {l:"400",v:400,c:"#00b894",t:"#1a1a1a"},
+  {l:"SUR GEÇER",v:"lose",c:"#636e72",t:"#dfe6e9"},
+  {l:"600",v:600,c:"#e17055",t:"#fff"},
+  {l:"350",v:350,c:"#0984e3",t:"#fff"},
+  {l:"1000",v:1000,c:"#fdcb6e",t:"#1a1a1a"},
+];
+
+// ═══════════════════════════════════════════════════════════════
+// DURUM
+// ═══════════════════════════════════════════════════════════════
+let teams=[{name:"Takım 1",score:0,pending:0},{name:"Takım 2",score:0,pending:0}];
+let cur=0, puzzle=null, revealed=new Set(), usedL=[], spinning=false, spinVal=null, canGuess=false, wAngle=0;
+let roundNum=1;
+// Her turun başındaki skorları sakla (tur sonu ekranı için)
+let roundStartScores=[];
+
+// ═══════════════════════════════════════════════════════════════
+// ÇARK ÇİZİMİ — 600x600 canvas
+// ═══════════════════════════════════════════════════════════════
+const cv=document.getElementById('wc');
+const cx=cv.getContext('2d');
+const W=600,H=600,R=272,CX=300,CY=300;
+
+function drawWheel(a){
+  cx.clearRect(0,0,W,H);
+  const n=SEGS.length, arc=(2*Math.PI)/n;
+  // Dış gölge
+  cx.save();
+  cx.shadowColor='rgba(0,0,0,0.5)';cx.shadowBlur=18;
+  for(let i=0;i<n;i++){
+    const s=SEGS[i],st=a+i*arc,en=st+arc;
+    cx.beginPath();cx.moveTo(CX,CY);cx.arc(CX,CY,R,st,en);cx.closePath();
+    cx.fillStyle=s.c;cx.fill();
+    cx.strokeStyle='rgba(0,0,0,.25)';cx.lineWidth=2;cx.stroke();
+  }
+  cx.restore();
+  // Metinler
+  for(let i=0;i<n;i++){
+    const s=SEGS[i], mid=a+i*arc+arc/2;
+    cx.save();cx.translate(CX,CY);cx.rotate(mid);
+    cx.textAlign='right';cx.fillStyle=s.t;
+    const fs=s.l.length>6?'11':s.l.length>3?'13':'16';
+    cx.font=`bold ${fs}px Nunito,sans-serif`;
+    cx.fillText(s.l,R-12,6);cx.restore();
+  }
+  // Merkez
+  cx.beginPath();cx.arc(CX,CY,26,0,2*Math.PI);
+  cx.fillStyle='#0d1b2a';cx.fill();
+  cx.strokeStyle='#f7c948';cx.lineWidth=4;cx.stroke();
+  cx.fillStyle='#f7c948';cx.font='bold 18px sans-serif';
+  cx.textAlign='center';cx.textBaseline='middle';
+  cx.fillText('★',CX,CY);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ÇARKI ÇEVİR
+// ═══════════════════════════════════════════════════════════════
+function spinWheel(){
+  if(spinning||canGuess)return;
+  if(soundOn) getCtx();
+  spinning=true; setGuess(false);
+  const total=(Math.random()*6+8)*Math.PI*2, dur=3500+Math.random()*1000;
+  startSpinSound(dur);
+  const startA=wAngle, t0=performance.now();
+  function ease(t){return t<.5?2*t*t:-1+(4-2*t)*t;}
+  function frame(now){
+    const t=Math.min((now-t0)/dur,1);
+    wAngle=startA+total*ease(t); drawWheel(wAngle);
+    if(t<1){requestAnimationFrame(frame);}
+    else{spinning=false;wAngle=wAngle%(2*Math.PI);stopSpinSound();playSpinStop();onSpinDone();}
+  }
+  requestAnimationFrame(frame);
+}
+
+function onSpinDone(){
+  const n=SEGS.length, arc=(2*Math.PI)/n;
+  const arrowA=Math.PI*1.5;
+  let norm=((arrowA-wAngle)%(2*Math.PI)+2*Math.PI)%(2*Math.PI);
+  const idx=Math.floor(norm/arc)%n, seg=SEGS[idx];
+  const sr=document.getElementById('spinResult');
+
+  if(seg.v==='lose'){
+    sr.textContent='😭 Sıra geçti!'; sr.style.color='#636e72';
+    showMsg('😭 Sıra geçti! Sonraki takım.','bad');
+    playWrong();
+    setTimeout(()=>nextTurn(true),1800);
+  } else {
+    sr.textContent=`✨ ${seg.l} puan!`; sr.style.color='#f7c948';
+    spinVal=seg.v; canGuess=true; setGuess(true);
+    // Sesli harf ipucu
+    updateVowelHint();
+    showMsg(`🎯 ${seg.l} puan! Ünsüz harf söyle veya sesli harf için puan harca.`,'info');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SESLİ HARF İPUCU
+// ═══════════════════════════════════════════════════════════════
+function updateVowelHint(){
+  const hint=document.getElementById('vowelHint');
+  if(spinVal && canGuess){
+    hint.style.display='block';
+    hint.textContent=`🔤 Sesli harf (A E I İ O Ö U Ü) söylersen ${spinVal} puan düşülür — ama kaç kez geçiyorsa o kadar puan EKLENİR`;
+  } else {
+    hint.style.display='none';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BULMACA
+// ═══════════════════════════════════════════════════════════════
+function pickPuzzle(){
+  const dKeys=Object.keys(DEYIMLER);
+  const aKeys=Object.keys(ATASOZLERI);
+  const isDeyim=Math.random()>.45;
+  const pool=isDeyim?dKeys:aKeys;
+  const key=pool[Math.floor(Math.random()*pool.length)];
+  const explanation=isDeyim?DEYIMLER[key]:ATASOZLERI[key];
+  return{text:key.toLocaleUpperCase('tr-TR'), original:key, type:isDeyim?'deyim':'atasoz', explanation};
+}
+
+function newPuzzle(){
+  // Tur başı skorlarını kaydet
+  roundStartScores=teams.map(t=>t.score);
+
+  puzzle=pickPuzzle();
+  revealed=new Set([' ',',','!','.','-',"'"]);
+  usedL=[]; spinVal=null; canGuess=false;
+  setGuess(false);
+  document.getElementById('spinResult').textContent='—';
+  document.getElementById('spinResult').style.color='';
+  document.getElementById('spinBtn').disabled=false;
+  document.getElementById('exBox').classList.remove('show');
+  document.getElementById('vowelHint').style.display='none';
+
+  const b=document.getElementById('badge');
+  if(puzzle.type==='deyim'){b.textContent='💬 DEYİM';b.className='category-badge cat-deyim';}
+  else{b.textContent='📜 ATASÖZÜ';b.className='category-badge cat-atasoz';}
+
+  renderPuzzle(); renderUsed();
+  showMsg('✨ Çarkı çevirerek başla!','info');
+  updateSB();
+}
+
+function renderPuzzle(){
+  const pd=document.getElementById('pd'); pd.innerHTML='';
+  const words=puzzle.text.split(' ');
+  words.forEach(word=>{
+    const wg=document.createElement('div'); wg.className='word-group';
+    for(const ch of word){
+      const tile=document.createElement('div');
+      const special=',!.-\''.includes(ch);
+      if(special){
+        tile.className='letter-tile special'; tile.textContent=ch;
+      } else {
+        tile.className='letter-tile '+(revealed.has(ch)?'revealed':'hidden');
+        tile.textContent=revealed.has(ch)?ch:'';
+        tile.dataset.char=ch;
+      }
+      wg.appendChild(tile);
+    }
+    pd.appendChild(wg);
+  });
+}
+
+function checkWin(){
+  for(const ch of puzzle.text){
+    if(' ,!.-\''.includes(ch))continue;
+    if(!revealed.has(ch))return false;
+  }
+  return true;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HARF TAHMİNİ — Sesli harf puan düşer
+// ═══════════════════════════════════════════════════════════════
+function guessLetter(){
+  if(!canGuess)return;
+  const inp=document.getElementById('li');
+  let l=inp.value.trim(); inp.value='';
+  if(!l)return;
+
+  // Türkçe büyük harf (İ/I ayrımı)
+  const lmap={'i':'İ','ı':'I','ş':'Ş','ğ':'Ğ','ö':'Ö','ü':'Ü','ç':'Ç',
+              'I':'I','İ':'İ','Ş':'Ş','Ğ':'Ğ','Ö':'Ö','Ü':'Ü','Ç':'Ç'};
+  l=lmap[l]!==undefined ? lmap[l] : l.toUpperCase();
+
+  if(usedL.filter(x=>!x.endsWith('_miss')).includes(l)||
+     usedL.filter(x=>!x.endsWith('_miss')).includes(l)){
+    // already used check
+  }
+  const allUsed=usedL.map(x=>x.replace('_miss',''));
+  if(allUsed.includes(l)){showMsg('⚠️ Bu harf zaten söylendi!','bad');return;}
+
+  const isVowel=SESLI.has(l);
+  const cnt=puzzle.text.split('').filter(c=>c===l).length;
+
+  if(isVowel){
+    // Sesli harf: önce puan düşülür
+    if(teams[cur].score + teams[cur].pending < spinVal){
+      showMsg(`⚠️ Yeterli puan yok! Sesli harf için ${spinVal} puana ihtiyacın var.`,'bad');
+      return;
+    }
+    usedL.push(l);
+    if(cnt>0){
+      revealed.add(l);
+      const net = (cnt * spinVal) - spinVal; // -1 tur + cnt * puan
+      // score'dan düş, kazanılanı ekle
+      teams[cur].score -= spinVal;
+      teams[cur].pending += cnt * spinVal;
+      updateSB(); renderPuzzle(); renderUsed();
+      playCorrect();
+      if(net >= 0){
+        showMsg(`🔤 Sesli harf "${l}" — ${cnt} kez geçiyor! ${spinVal} düşüldü, ${cnt*spinVal} eklendi. Net: +${net}`, 'good');
+      } else {
+        showMsg(`🔤 Sesli harf "${l}" — ${cnt} kez geçiyor ama pahalıya patladı! Net: ${net}`, 'bad');
+      }
+      canGuess=false; setGuess(false);
+      document.getElementById('spinBtn').disabled=false;
+      document.getElementById('vowelHint').style.display='none';
+      if(checkWin()) setTimeout(()=>winRound(),400);
+    } else {
+      usedL[usedL.length-1]=l+'_miss';
+      teams[cur].score -= spinVal;
+      updateSB(); renderUsed();
+      playWrong();
+      showMsg(`🔤 Sesli harf "${l}" yok — ${spinVal} puan düşüldü. Sıra geçti.`,'bad');
+      canGuess=false; setGuess(false);
+      document.getElementById('vowelHint').style.display='none';
+      setTimeout(()=>nextTurn(true),2000);
+    }
+  } else {
+    // Ünsüz harf: normal kural
+    usedL.push(l);
+    if(cnt>0){
+      revealed.add(l);
+      const earned=cnt*spinVal;
+      teams[cur].pending+=earned;
+      updateSB(); renderPuzzle(); renderUsed();
+      playCorrect();
+      showMsg(`✅ "${l}" harfi ${cnt} kez geçiyor! +${earned} puan (Toplam bekleme: ${teams[cur].pending})`, 'good');
+      canGuess=false; setGuess(false);
+      document.getElementById('spinBtn').disabled=false;
+      document.getElementById('vowelHint').style.display='none';
+      if(checkWin()) setTimeout(()=>winRound(),400);
+    } else {
+      usedL[usedL.length-1]=l+'_miss';
+      renderUsed();
+      playWrong();
+      showMsg(`❌ "${l}" harfi yok. Sıra geçti.`,'bad');
+      canGuess=false; setGuess(false);
+      document.getElementById('vowelHint').style.display='none';
+      setTimeout(()=>nextTurn(true),1800);
+    }
+  }
+}
+
+function renderUsed(){
+  const ul=document.getElementById('ul'); ul.innerHTML='<span>Kullanılan:</span>';
+  usedL.forEach(raw=>{
+    const isMiss=raw.endsWith('_miss');
+    const l=isMiss?raw.replace('_miss',''):raw;
+    const isVowel=SESLI.has(l);
+    const p=document.createElement('span');
+    if(isMiss) p.className='used-pill miss';
+    else if(isVowel) p.className='used-pill vowel-paid';
+    else p.className='used-pill hit';
+    p.textContent=l; ul.appendChild(p);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ÇÖZME MODALI
+// ═══════════════════════════════════════════════════════════════
+function openModal(){
+  document.getElementById('mo').classList.add('show');
+  document.getElementById('si').value='';
+  setTimeout(()=>document.getElementById('si').focus(),100);
+}
+function closeModal(){document.getElementById('mo').classList.remove('show');}
+
+function confirmSolve(){
+  const inp=document.getElementById('si').value.trim().toLocaleUpperCase('tr-TR');
+  const ans=puzzle.text;
+  function norm(s){return s.replace(/[',.\-!]/g,'').replace(/\s+/g,' ').trim();}
+  closeModal();
+  if(norm(inp)===norm(ans)){
+    revealed=new Set(ans.split(''));
+    renderPuzzle();
+    winRound(true);
+  } else {
+    showMsg('❌ Yanlış cevap! Sıra geçti.','bad');
+    playWrong();
+    canGuess=false; setGuess(false);
+    setTimeout(()=>nextTurn(true),1800);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// KAZANMA + TUR SONU EKRANI
+// ═══════════════════════════════════════════════════════════════
+function winRound(bonus=false){
+  const t=teams[cur];
+  const bonusPts=bonus?500:0;
+  t.score+=t.pending+bonusPts;
+  t.pending=0;
+  updateSB();
+  setGuess(false); canGuess=false;
+  document.getElementById('spinBtn').disabled=true;
+  document.getElementById('vowelHint').style.display='none';
+  const bonusTxt=bonus?' +500 BONUS puan!':'';
+  showMsg(`🏆 ${t.name} kazandı!${bonusTxt}`,'win');
+  spawnConfetti();
+  playWin();
+  showExplanation();
+  // Kısa gecikme sonra tur sonu ekranı
+  setTimeout(()=>showRoundBoard(),2200);
+}
+
+function showExplanation(){
+  const box=document.getElementById('exBox');
+  const title=document.getElementById('exTitle');
+  const text=document.getElementById('exText');
+  const typeTxt=puzzle.type==='deyim'?'💬 DEYİM ANLAMI':'📜 ATASÖZÜ ANLAMI';
+  title.textContent=`${typeTxt}: "${puzzle.original}"`;
+  text.textContent=puzzle.explanation||'Açıklama bulunamadı.';
+  box.classList.add('show');
+}
+
+function showRoundBoard(){
+  const overlay=document.getElementById('roundOverlay');
+  const sub=document.getElementById('roundSub');
+  const scoresDiv=document.getElementById('roundScores');
+
+  sub.textContent=`${roundNum}. Tur — "${puzzle.original}"`;
+
+  // Kazanan takımı bul
+  const maxScore=Math.max(...teams.map(t=>t.score));
+
+  scoresDiv.innerHTML='';
+  // Skora göre sırala
+  const sorted=[...teams].map((t,i)=>({...t, idx:i})).sort((a,b)=>b.score-a.score);
+  sorted.forEach(t=>{
+    const gained=t.score - (roundStartScores[t.idx]||0);
+    const row=document.createElement('div');
+    row.className='round-score-row'+(t.score===maxScore?' winner':'');
+    row.innerHTML=`
+      <div>
+        <div class="rs-name">${t.score===maxScore?'🥇 ':''} ${t.name||'Takım '+(t.idx+1)}</div>
+        <div class="rs-gained">${gained>=0?'+':''}${gained} bu tur</div>
+      </div>
+      <div class="rs-pts">${t.score}</div>
+    `;
+    scoresDiv.appendChild(row);
+  });
+
+  overlay.classList.add('show');
+}
+
+function closeRoundBoard(){
+  document.getElementById('roundOverlay').classList.remove('show');
+  roundNum++;
+  newPuzzle();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TAKIMLAR
+// ═══════════════════════════════════════════════════════════════
+function nextTurn(auto=false){
+  // Mevcut takımın bekleyen puanını anında score'a ekle
+  if(teams[cur].pending > 0){
+    teams[cur].score += teams[cur].pending;
+    teams[cur].pending = 0;
+  }
+  cur=(cur+1)%teams.length;
+  canGuess=false; setGuess(false);
+  updateSB();
+  if(auto){
+    document.getElementById('spinResult').textContent='—';
+    document.getElementById('spinResult').style.color='';
+    document.getElementById('spinBtn').disabled=false;
+    document.getElementById('vowelHint').style.display='none';
+    showMsg(`🎮 Sıra: ${teams[cur].name||'Takım '+(cur+1)}! Çarkı çevir.`,'info');
+  }
+}
+function skipTurn(){
+  nextTurn(true);
+}
+
+function renderTeamInputs(){
+  const wrap=document.getElementById('teamInputs'); wrap.innerHTML='';
+  teams.forEach((t,i)=>{
+    const div=document.createElement('div'); div.className='team-input-wrap';
+    div.innerHTML=`
+      <label>T${i+1}</label>
+      <input class="team-name-inp" placeholder="Takım ${i+1}" value="${t.name}"
+        oninput="teams[${i}].name=this.value||'Takım ${i+1}';updateSB()">
+      ${teams.length>1?`<button class="remove-team-btn" onclick="removeTeam(${i})">✕</button>`:''}
+    `;
+    wrap.appendChild(div);
+  });
+  if(teams.length<6){
+    const btn=document.createElement('button'); btn.className='add-team-btn';
+    btn.textContent='＋ Takım Ekle'; btn.onclick=addTeamFn;
+    wrap.appendChild(btn);
+  }
+}
+
+function addTeamFn(){
+  if(teams.length>=6) return;
+  teams.push({name:`Takım ${teams.length+1}`,score:0,pending:0});
+  renderTeamInputs(); updateSB();
+}
+
+function removeTeam(i){
+  if(teams.length<=1) return;
+  teams.splice(i,1);
+  if(cur>=teams.length) cur=0;
+  renderTeamInputs(); updateSB();
+}
+
+function updateSB(){
+  const sb=document.getElementById('sb'); sb.innerHTML='';
+  teams.forEach((t,i)=>{
+    const c=document.createElement('div');
+    c.className='team-card'+(i===cur?' active':'');
+    c.innerHTML=`
+      <div class="tname">${t.name||'Takım '+(i+1)}</div>
+      <div class="tscore">${t.score}</div>
+      ${t.pending>0?`<div class="tpending">+${t.pending} bekliyor</div>`:''}
+    `;
+    sb.appendChild(c);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SES SİSTEMİ
+// ═══════════════════════════════════════════════════════════════
+let soundOn=true, audioCtx=null;
+
+function getCtx(){
+  if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  return audioCtx;
+}
+
+// Genel ton çalıcı
+function playTone(freq,type,dur,vol=0.25,attack=0.005){
+  if(!soundOn)return;
+  try{
+    const ctx=getCtx();
+    const o=ctx.createOscillator(), g=ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type=type; o.frequency.setValueAtTime(freq,ctx.currentTime);
+    g.gain.setValueAtTime(0,ctx.currentTime);
+    g.gain.linearRampToValueAtTime(vol,ctx.currentTime+attack);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
+    o.start(ctx.currentTime); o.stop(ctx.currentTime+dur);
+  }catch(e){}
+}
+
+// Doğal "tık" sesi — kısa noise burst (tahta/plastik tıklama hissi)
+function playClick(vol=0.18){
+  if(!soundOn)return;
+  try{
+    const ctx=getCtx();
+    const bufSize=ctx.sampleRate*0.018; // 18ms gürültü
+    const buf=ctx.createBuffer(1,bufSize,ctx.sampleRate);
+    const data=buf.getChannelData(0);
+    for(let i=0;i<bufSize;i++) data[i]=(Math.random()*2-1);
+
+    const src=ctx.createBufferSource();
+    src.buffer=buf;
+
+    // Bant geçiren filtre — orta frekanslar daha "ahşap" ses verir
+    const bp=ctx.createBiquadFilter();
+    bp.type='bandpass'; bp.frequency.value=2200; bp.Q.value=1.2;
+
+    // Yüksek kesim — yumuşat
+    const hp=ctx.createBiquadFilter();
+    hp.type='highpass'; hp.frequency.value=800;
+
+    const g=ctx.createGain();
+    g.gain.setValueAtTime(vol,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.018);
+
+    src.connect(bp); bp.connect(hp); hp.connect(g); g.connect(ctx.destination);
+    src.start(ctx.currentTime); src.stop(ctx.currentTime+0.02);
+  }catch(e){}
+}
+
+// Çark dönüş sesi — hız azaldıkça tıklamalar yavaşlar
+let spinTickTimeout=null;
+let _spinSpeed=0, _spinStartTime=0, _spinDur=0;
+
+function startSpinSound(duration){
+  if(!soundOn)return;
+  _spinDur = duration||4000;
+  _spinStartTime = performance.now();
+  _spinSpeed = 55; // başlangıç aralığı ms
+
+  function tick(){
+    if(!soundOn){spinTickTimeout=null;return;}
+    const elapsed=performance.now()-_spinStartTime;
+    const progress=Math.min(elapsed/_spinDur,1);
+    // Ease out: başta hızlı, sonda yavaş
+    const eased=1-Math.pow(1-progress,2);
+    const interval=55+eased*320; // 55ms→375ms
+    const vol=0.12+eased*0.08;   // biraz daha sessiz yavaşlayınca
+    playClick(vol);
+    if(progress<0.98){
+      spinTickTimeout=setTimeout(tick,interval);
+    } else {
+      spinTickTimeout=null;
+    }
+  }
+  tick();
+}
+
+function stopSpinSound(){
+  clearTimeout(spinTickTimeout);
+  spinTickTimeout=null;
+}
+
+// Çark durma sesi — son tık + küçük "yerleşme" sesi
+function playSpinStop(){
+  if(!soundOn)return;
+  playClick(0.28); // güçlü son tık
+  setTimeout(()=>{
+    // Kısa "boing" — çarkın durduğunun hissi
+    playTone(320,'sine',0.18,0.12,0.002);
+    playTone(260,'sine',0.22,0.08,0.01);
+  },40);
+}
+
+// Doğru harf — yumuşak üç nota
+function playCorrect(){
+  if(!soundOn)return;
+  playTone(523,'sine',0.15,0.2,0.005);
+  setTimeout(()=>playTone(659,'sine',0.15,0.2,0.005),110);
+  setTimeout(()=>playTone(784,'sine',0.22,0.22,0.005),220);
+}
+
+// Yanlış harf — kısa düşen ses
+function playWrong(){
+  if(!soundOn)return;
+  playTone(300,'triangle',0.12,0.28,0.003);
+  setTimeout(()=>playTone(220,'triangle',0.18,0.15,0.003),110);
+}
+
+// Kazanma fanfarı
+function playWin(){
+  if(!soundOn)return;
+  const melody=[523,659,784,1047];
+  melody.forEach((f,i)=>setTimeout(()=>playTone(f,'sine',0.28,0.25,0.008),i*130));
+  setTimeout(()=>{
+    playTone(523,'sine',0.5,0.18,0.01);
+    playTone(659,'sine',0.5,0.15,0.01);
+    playTone(784,'sine',0.5,0.15,0.01);
+    playTone(1047,'sine',0.5,0.15,0.01);
+  },650);
+}
+
+function toggleSound(){
+  soundOn=!soundOn;
+  const btn=document.getElementById('soundToggle');
+  btn.textContent=soundOn?'🔊 Ses Açık':'🔇 Ses Kapalı';
+  btn.className='sound-toggle'+(soundOn?' on':'');
+  if(soundOn) getCtx();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// YARDIMCILAR
+// ═══════════════════════════════════════════════════════════════
+function setGuess(v){
+  document.getElementById('li').disabled=!v;
+  document.getElementById('gb').disabled=!v;
+  document.getElementById('slvb').disabled=!v;
+  if(v)setTimeout(()=>document.getElementById('li').focus(),50);
+}
+function showMsg(m,type){const b=document.getElementById('msg');b.textContent=m;b.className=`message-box msg-${type}`;}
+function spawnConfetti(){
+  const cols=['#f7c948','#ff6b6b','#4ecdc4','#a29bfe','#55efc4','#fd79a8'];
+  for(let i=0;i<70;i++){
+    setTimeout(()=>{
+      const c=document.createElement('div');c.className='confetti';
+      c.style.left=Math.random()*100+'vw';c.style.top='-10px';
+      c.style.background=cols[Math.floor(Math.random()*cols.length)];
+      c.style.width=(8+Math.random()*10)+'px';c.style.height=(8+Math.random()*10)+'px';
+      c.style.animationDuration=(1.5+Math.random())+'s';
+      document.body.appendChild(c);setTimeout(()=>c.remove(),2500);
+    },i*28);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BAŞLAT
+// ═══════════════════════════════════════════════════════════════
+drawWheel(0);
+newPuzzle();
+updateSB();
+renderTeamInputs();
+</script>
+</body>
+</html>
